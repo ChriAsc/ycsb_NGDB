@@ -5,10 +5,12 @@ import site.ycsb.Status;
 import site.ycsb.Workload;
 import site.ycsb.generator.UniformLongGenerator;
 import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Properties;
 import site.ycsb.*;
+import site.ycsb.ByteIterator;
+import site.ycsb.StringByteIterator;
 import site.ycsb.generator.*;
-import site.ycsb.generator.UniformLongGenerator;
 import site.ycsb.measurements.Measurements;
 
 import java.io.IOException;
@@ -33,33 +35,34 @@ public class CustomWorkload extends Workload {
 
   @Override
   public boolean doInsert(DB db, Object threadState) {
-    String key = Integer.toString(keyChooser.nextInt());
-    HashMap<String, String> values = new HashMap<>();
-    values.put("field1", generateRandomValue(fieldValueLengthGenerator.nextInt()));
-    values.put("field2", generateRandomValue(fieldValueLengthGenerator.nextInt()));
+    String key = Integer.toString(keyChooser.nextValue().intValue());
+    Map<String, ByteIterator> values = new HashMap<String, ByteIterator>();
+    values.put("field1", generateRandomValue(fieldValueLengthGenerator.nextValue().intValue()));
+    values.put("field2", generateRandomValue(fieldValueLengthGenerator.nextValue().intValue()));
     Status result = db.insert("table1", key, values);
     return result == Status.OK;
   }
 
   @Override
   public boolean doTransaction(DB db, Object threadState) {
-    int operation = operationChooser.nextInt();
-    String key = Integer.toString(keyChooser.nextInt());
+    int operation = operationChooser.nextValue().intValue();
+    String key = Integer.toString(keyChooser.nextValue().intValue());
 
     try {
       if (operation < 70) {
         // 70% read operation
-        db.read("table1", key, null);
+        Map<String, ByteIterator> results = new HashMap<String, ByteIterator>();
+        db.read("table1", key, null, results);
       } else if (operation < 90) {
         // 20% insert operation
-        HashMap<String, String> values = new HashMap<>();
-        values.put("field1", generateRandomValue(fieldValueLengthGenerator.nextInt()));
-        values.put("field2", generateRandomValue(fieldValueLengthGenerator.nextInt()));
+        Map<String, ByteIterator> values = new HashMap<String, ByteIterator>();
+        values.put("field1", generateRandomValue(fieldValueLengthGenerator.nextValue().intValue()));
+        values.put("field2", generateRandomValue(fieldValueLengthGenerator.nextValue().intValue()));
         db.insert("table1", key, values);
       } else {
         // 10% update operation
-        HashMap<String, String> updateValues = new HashMap<>();
-        updateValues.put("field1", generateRandomValue(fieldValueLengthGenerator.nextInt()));
+        Map<String, ByteIterator> updateValues = new HashMap<String, ByteIterator>();
+        updateValues.put("field1", generateRandomValue(fieldValueLengthGenerator.nextValue().intValue()));
         db.update("table1", key, updateValues);
       }
       return true;
@@ -70,7 +73,7 @@ public class CustomWorkload extends Workload {
   }
 
 
-  private String generateRandomValue(int length) {
+  private ByteIterator generateRandomValue(int length) {
     // Generate a random alphanumeric string of given length
     // You might want to use a more sophisticated random data generator library
     // to create realistic data
@@ -80,7 +83,8 @@ public class CustomWorkload extends Workload {
       int index = (int) (Math.random() * characters.length());
       sb.append(characters.charAt(index));
     }
-    return sb.toString();
+    ByteIterator res = new StringByteIterator(sb.toString());
+    return res;
   }
 
 }
