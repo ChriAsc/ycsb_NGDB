@@ -3,6 +3,7 @@ YCSB
 [![Docs](https://img.shields.io/badge/docs-reference-blue.svg)](https://github.com/brianfrankcooper/YCSB/wiki)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://github.com/ChriAsc/ycsb_NGDB/blob/main/LICENSE.txt)
 
+<sub>In this repository, we have imported and used files from the [YCSB (Yahoo Cloud Serving Benchmark)](https://github.com/brianfrankcooper/YCSB) project. YCSB is a popular benchmarking tool for evaluating the performance of various NoSQL databases and cloud-based datastores. Please, refer to their wiki for more information.</sub> 
 
 Getting Started
 ---------------
