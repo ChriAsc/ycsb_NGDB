@@ -8,7 +8,7 @@ Yahoo Cloud Serving Benchmark (NGDB)
 Getting Started
 ---------------
 
-1. Download the [latest release of YCSB](https://github.com/ChriAsc/ycsb_NGDB/releases):
+1. Download the [latest release of ycsb_NGDB](https://github.com/ChriAsc/ycsb_NGDB/releases):
 
     ```sh
     curl -O --location https://github.com/ChriAsc/ycsb_NGDB/releases/...
