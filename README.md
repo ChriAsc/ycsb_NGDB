@@ -1,4 +1,4 @@
-YCSB
+Yahoo Cloud Serving Benchmark (NGDB)
 ====================================
 [![Docs](https://img.shields.io/badge/docs-reference-blue.svg)](https://github.com/brianfrankcooper/YCSB/wiki)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://github.com/ChriAsc/ycsb_NGDB/blob/main/LICENSE.txt)
