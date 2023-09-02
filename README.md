@@ -1,14 +1,8 @@
 YCSB
 ====================================
-[![Build Status](https://travis-ci.org/brianfrankcooper/YCSB.png?branch=master)](https://travis-ci.org/brianfrankcooper/YCSB)
+[![Docs](https://img.shields.io/badge/docs-reference-blue.svg)](https://github.com/brianfrankcooper/YCSB/wiki)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://github.com/ChriAsc/ycsb_NGDB/blob/main/LICENSE.txt)
 
-
-
-Links
------
-* To get here, use https://ycsb.site
-* [Original project docs](https://github.com/brianfrankcooper/YCSB/wiki)
-* [The original announcement from Yahoo!](https://labs.yahoo.com/news/yahoo-cloud-serving-benchmark/)
 
 Getting Started
 ---------------
@@ -60,3 +54,9 @@ To build the full distribution, with all database bindings:
 To build a single database binding:
 
     mvn -pl site.ycsb:mongodb-binding -am clean package
+
+
+Links
+-----
+* [Original project docs](https://github.com/brianfrankcooper/YCSB/wiki)
+* [The original announcement from Yahoo!](https://labs.yahoo.com/news/yahoo-cloud-serving-benchmark/)
