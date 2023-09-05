@@ -29,7 +29,7 @@ public class CustomWorkload extends Workload {
   /**
    * The default name of the database table to run queries against.
    */
-  public static final String TABLENAME_PROPERTY_DEFAULT = "usertable";
+  public static final String TABLENAME_PROPERTY_DEFAULT = "products";
 
   protected String table;
 
@@ -327,7 +327,7 @@ public class CustomWorkload extends Workload {
   private Measurements measurements = Measurements.getMeasurements();
 
   //CUSTOM VALUES
-  protected List<String> customFieldNames = Arrays.asList("Nome", "Cognome", "Data di nascita", "Residenza"); 
+  protected List<String> customFieldNames = Arrays.asList("Nome", "Prezzo","Disponibilità", "Descrizione", "Categoria", 100);
 
   /*
    * Costruisce la chiave dei documenti che si andranno ad inserire
@@ -338,7 +338,7 @@ public class CustomWorkload extends Workload {
     }
     String value = Long.toString(keynum);
     int fill = zeropadding - value.length();
-    String prekey = "user";
+    String prekey = "prod";
     for (int i = 0; i < fill; i++) {
       prekey += '0';
     }
@@ -379,6 +379,66 @@ public class CustomWorkload extends Workload {
     return fieldlengthgenerator;
   }
 
+  protected static NumberGenerator stringFieldLengthGenerator(Properties p) throws WorkloadException {
+    NumberGenerator fieldlengthgenerator;
+    String fieldlengthdistribution = p.getProperty(
+        FIELD_LENGTH_DISTRIBUTION_PROPERTY, FIELD_LENGTH_DISTRIBUTION_PROPERTY_DEFAULT);
+    int fieldlength =
+        Integer.parseInt(100);
+    int minfieldlength =
+        Integer.parseInt(p.getProperty(MIN_FIELD_LENGTH_PROPERTY, MIN_FIELD_LENGTH_PROPERTY_DEFAULT));
+    String fieldlengthhistogram = p.getProperty(
+        FIELD_LENGTH_HISTOGRAM_FILE_PROPERTY, FIELD_LENGTH_HISTOGRAM_FILE_PROPERTY_DEFAULT);
+    if (fieldlengthdistribution.compareTo("constant") == 0) {
+      fieldlengthgenerator = new ConstantIntegerGenerator(fieldlength);
+    } else if (fieldlengthdistribution.compareTo("uniform") == 0) {
+      fieldlengthgenerator = new UniformLongGenerator(minfieldlength, fieldlength);
+    } else if (fieldlengthdistribution.compareTo("zipfian") == 0) {
+      fieldlengthgenerator = new ZipfianGenerator(minfieldlength, fieldlength);
+    } else if (fieldlengthdistribution.compareTo("histogram") == 0) {
+      try {
+        fieldlengthgenerator = new HistogramGenerator(fieldlengthhistogram);
+      } catch (IOException e) {
+        throw new WorkloadException(
+            "Couldn't read field length histogram file: " + fieldlengthhistogram, e);
+      }
+    } else {
+      throw new WorkloadException(
+          "Unknown field length distribution \"" + fieldlengthdistribution + "\"");
+    }
+    return fieldlengthgenerator;
+  }
+
+  protected static NumberGenerator intFieldLengthGenerator(Properties p) throws WorkloadException {
+    NumberGenerator fieldlengthgenerator;
+    String fieldlengthdistribution = p.getProperty(
+        FIELD_LENGTH_DISTRIBUTION_PROPERTY, FIELD_LENGTH_DISTRIBUTION_PROPERTY_DEFAULT);
+    int fieldlength =
+        Integer.parseInt(4);
+    int minfieldlength =
+        Integer.parseInt(p.getProperty(MIN_FIELD_LENGTH_PROPERTY, MIN_FIELD_LENGTH_PROPERTY_DEFAULT));
+    String fieldlengthhistogram = p.getProperty(
+        FIELD_LENGTH_HISTOGRAM_FILE_PROPERTY, FIELD_LENGTH_HISTOGRAM_FILE_PROPERTY_DEFAULT);
+    if (fieldlengthdistribution.compareTo("constant") == 0) {
+      fieldlengthgenerator = new ConstantIntegerGenerator(fieldlength);
+    } else if (fieldlengthdistribution.compareTo("uniform") == 0) {
+      fieldlengthgenerator = new UniformLongGenerator(minfieldlength, fieldlength);
+    } else if (fieldlengthdistribution.compareTo("zipfian") == 0) {
+      fieldlengthgenerator = new ZipfianGenerator(minfieldlength, fieldlength);
+    } else if (fieldlengthdistribution.compareTo("histogram") == 0) {
+      try {
+        fieldlengthgenerator = new HistogramGenerator(fieldlengthhistogram);
+      } catch (IOException e) {
+        throw new WorkloadException(
+            "Couldn't read field length histogram file: " + fieldlengthhistogram, e);
+      }
+    } else {
+      throw new WorkloadException(
+          "Unknown field length distribution \"" + fieldlengthdistribution + "\"");
+    }
+    return fieldlengthgenerator;
+  }
+
   /**
    * Initialize the scenario.
    * Called once, in the main client thread, before any operations are started.
@@ -388,9 +448,9 @@ public class CustomWorkload extends Workload {
     table = p.getProperty(TABLENAME_PROPERTY, TABLENAME_PROPERTY_DEFAULT);
     
     //Può essere deciso a prescindere dipende come strutturiamo i dati
-    fieldcount = 4;
+    fieldcount = 5;
         //Long.parseLong(p.getProperty(FIELD_COUNT_PROPERTY, FIELD_COUNT_PROPERTY_DEFAULT));
-    final String fieldnameprefix = p.getProperty(FIELD_NAME_PREFIX, FIELD_NAME_PREFIX_DEFAULT);
+    //final String fieldnameprefix = p.getProperty(FIELD_NAME_PREFIX, FIELD_NAME_PREFIX_DEFAULT);
 
     //Può essere anche hardcoded se decidiamo a priori quali sono i campi
     fieldnames = new ArrayList<>();
@@ -399,6 +459,8 @@ public class CustomWorkload extends Workload {
       //fieldnames.add(fieldnameprefix + i);
     }
     fieldlengthgenerator = CoreWorkload.getFieldLengthGenerator(p);
+    stringlengthgenerator = CoreWorkload.stringFieldLengthGenerator(p);
+    intlengthgenerator = CoreWorkload.intFieldLengthGenerator(p);
 
     recordcount =
         Long.parseLong(p.getProperty(Client.RECORD_COUNT_PROPERTY, Client.DEFAULT_RECORD_COUNT));
@@ -527,8 +589,12 @@ public class CustomWorkload extends Workload {
     if (dataintegrity) {
       data = new StringByteIterator(buildDeterministicValue(key, fieldkey));
     } else {
-      // fill with random data
-      data = new RandomByteIterator(fieldlengthgenerator.nextValue().longValue());
+      if(fieldkey == "Prezzo" || fieldkey == "Disponibilità"){
+        // fill with random data
+        data = new RandomByteIterator(intlengthgenerator.nextValue().longValue());
+      } else {
+        data = new RandomByteIterator(stringlengthgenerator.nextValue().longValue());
+      }
     }
     value.put(fieldkey, data);
 
@@ -547,8 +613,12 @@ public class CustomWorkload extends Workload {
       if (dataintegrity) {
         data = new StringByteIterator(buildDeterministicValue(key, fieldkey));
       } else {
-        // fill with random data
-        data = new RandomByteIterator(fieldlengthgenerator.nextValue().longValue());
+        if(fieldkey == "Prezzo" || fieldkey == "Disponibilità"){
+          // fill with random data
+          data = new RandomByteIterator(intlengthgenerator.nextValue().longValue());
+        } else {
+          data = new RandomByteIterator(stringlengthgenerator.nextValue().longValue());
+        }
       }
       values.put(fieldkey, data);
     }
