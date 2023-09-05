@@ -96,6 +96,8 @@ public class CustomWorkload extends Workload {
    * start with "FIELD_LENGTH_".
    */
   protected NumberGenerator fieldlengthgenerator;
+  protected NumberGenerator stringlengthgenerator;
+  protected NumberGenerator intlengthgenerator;
 
   /**
    * The name of the property for deciding whether to read one field (false) or all fields (true) of
@@ -327,7 +329,7 @@ public class CustomWorkload extends Workload {
   private Measurements measurements = Measurements.getMeasurements();
 
   //CUSTOM VALUES
-  protected List<String> customFieldNames = Arrays.asList("Nome", "Prezzo","Disponibilità", "Descrizione", "Categoria", 100);
+  protected List<String> customFieldNames = Arrays.asList("Nome", "Prezzo","Disponibilità", "Descrizione", "Categoria");
 
   /*
    * Costruisce la chiave dei documenti che si andranno ad inserire
@@ -383,8 +385,7 @@ public class CustomWorkload extends Workload {
     NumberGenerator fieldlengthgenerator;
     String fieldlengthdistribution = p.getProperty(
         FIELD_LENGTH_DISTRIBUTION_PROPERTY, FIELD_LENGTH_DISTRIBUTION_PROPERTY_DEFAULT);
-    int fieldlength =
-        Integer.parseInt(100);
+    int fieldlength = 100;
     int minfieldlength =
         Integer.parseInt(p.getProperty(MIN_FIELD_LENGTH_PROPERTY, MIN_FIELD_LENGTH_PROPERTY_DEFAULT));
     String fieldlengthhistogram = p.getProperty(
@@ -413,8 +414,7 @@ public class CustomWorkload extends Workload {
     NumberGenerator fieldlengthgenerator;
     String fieldlengthdistribution = p.getProperty(
         FIELD_LENGTH_DISTRIBUTION_PROPERTY, FIELD_LENGTH_DISTRIBUTION_PROPERTY_DEFAULT);
-    int fieldlength =
-        Integer.parseInt(4);
+    int fieldlength = 4;
     int minfieldlength =
         Integer.parseInt(p.getProperty(MIN_FIELD_LENGTH_PROPERTY, MIN_FIELD_LENGTH_PROPERTY_DEFAULT));
     String fieldlengthhistogram = p.getProperty(
@@ -458,9 +458,9 @@ public class CustomWorkload extends Workload {
       fieldnames.add(customFieldNames.get(i));
       //fieldnames.add(fieldnameprefix + i);
     }
-    fieldlengthgenerator = CoreWorkload.getFieldLengthGenerator(p);
-    stringlengthgenerator = CoreWorkload.stringFieldLengthGenerator(p);
-    intlengthgenerator = CoreWorkload.intFieldLengthGenerator(p);
+    fieldlengthgenerator = CustomWorkload.getFieldLengthGenerator(p);
+    stringlengthgenerator = CustomWorkload.stringFieldLengthGenerator(p);
+    intlengthgenerator = CustomWorkload.intFieldLengthGenerator(p);
 
     recordcount =
         Long.parseLong(p.getProperty(Client.RECORD_COUNT_PROPERTY, Client.DEFAULT_RECORD_COUNT));
@@ -653,7 +653,7 @@ public class CustomWorkload extends Workload {
   @Override
   public boolean doInsert(DB db, Object threadstate) {
     int keynum = keysequence.nextValue().intValue();
-    String dbkey = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
+    String dbkey = CustomWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
     HashMap<String, ByteIterator> values = buildValues(dbkey);
 
     Status status;
@@ -764,7 +764,7 @@ public class CustomWorkload extends Workload {
     // choose a random key
     long keynum = nextKeynum();
 
-    String keyname = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
+    String keyname = CustomWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
 
     HashSet<String> fields = null;
 
@@ -791,7 +791,7 @@ public class CustomWorkload extends Workload {
     // choose a random key
     long keynum = nextKeynum();
 
-    String keyname = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
+    String keyname = CustomWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
 
     HashSet<String> fields = null;
 
@@ -838,7 +838,7 @@ public class CustomWorkload extends Workload {
     // choose a random key
     long keynum = nextKeynum();
 
-    String startkeyname = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
+    String startkeyname = CustomWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
 
     // choose a random scan length
     int len = scanlength.nextValue().intValue();
@@ -860,7 +860,7 @@ public class CustomWorkload extends Workload {
     // choose a random key
     long keynum = nextKeynum();
 
-    String keyname = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
+    String keyname = CustomWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
 
     HashMap<String, ByteIterator> values;
 
@@ -880,7 +880,7 @@ public class CustomWorkload extends Workload {
     long keynum = transactioninsertkeysequence.nextValue();
 
     try {
-      String dbkey = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
+      String dbkey = CustomWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
 
       HashMap<String, ByteIterator> values = buildValues(dbkey);
       db.insert(table, dbkey, values);
