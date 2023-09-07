@@ -589,7 +589,7 @@ public class CustomWorkload extends Workload {
     if (dataintegrity) {
       data = new StringByteIterator(buildDeterministicValue(key, fieldkey));
     } else {
-      if(fieldkey == "Prezzo" || fieldkey == "Disponibilita"){
+      if(fieldkey == "prezzo" || fieldkey == "disponibilita"){
         // fill with random data
         data = new RandomByteIterator(intlengthgenerator.nextValue().longValue());
       } else {
@@ -613,7 +613,7 @@ public class CustomWorkload extends Workload {
       if (dataintegrity) {
         data = new StringByteIterator(buildDeterministicValue(key, fieldkey));
       } else {
-        if(fieldkey == "Prezzo" || fieldkey == "Disponibilita"){
+        if(fieldkey == "prezzo" || fieldkey == "disponibilita"){
           // fill with random data
           data = new RandomByteIterator(intlengthgenerator.nextValue().longValue());
         } else {
