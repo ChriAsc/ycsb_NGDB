@@ -329,7 +329,7 @@ public class CustomWorkload extends Workload {
   private Measurements measurements = Measurements.getMeasurements();
 
   //CUSTOM VALUES
-  protected List<String> customFieldNames = Arrays.asList("Nome", "Prezzo","Disponibilità", "Descrizione", "Categoria");
+  protected List<String> customFieldNames = Arrays.asList("nome", "prezzo","disponibilita", "descrizione", "categoria");
 
   /*
    * Costruisce la chiave dei documenti che si andranno ad inserire
@@ -589,7 +589,7 @@ public class CustomWorkload extends Workload {
     if (dataintegrity) {
       data = new StringByteIterator(buildDeterministicValue(key, fieldkey));
     } else {
-      if(fieldkey == "Prezzo" || fieldkey == "Disponibilità"){
+      if(fieldkey == "Prezzo" || fieldkey == "Disponibilita"){
         // fill with random data
         data = new RandomByteIterator(intlengthgenerator.nextValue().longValue());
       } else {
@@ -613,7 +613,7 @@ public class CustomWorkload extends Workload {
       if (dataintegrity) {
         data = new StringByteIterator(buildDeterministicValue(key, fieldkey));
       } else {
-        if(fieldkey == "Prezzo" || fieldkey == "Disponibilità"){
+        if(fieldkey == "Prezzo" || fieldkey == "Disponibilita"){
           // fill with random data
           data = new RandomByteIterator(intlengthgenerator.nextValue().longValue());
         } else {
