@@ -11,25 +11,25 @@ This project is dedicated to benchmarking some of the most popular NoSQL databas
 *YCSB* is an open-source benchmarking tool created by Yahoo! to assess the performance of various NoSQL databases. It provides a standardized framework for testing the scalability and performance of different data stores under realistic workloads. This project mainly uses a *products* table and aach product in this table contains essential information, including its name, price, availability, description and category. Three distinct workloads were defined to assess different database scenarios.
 
 In this repository, we focus on benchmarking three prominent NoSQL databases:
-- Redis: an in-memory data store used for caching and high-speed data access.
-- MongoDB: a powerful document-oriented database known for its flexibility and scalability.
-- Cassandra: a distributed, highly available and scalable NoSQL database designed for handling large amounts of data.
+- [Redis](https://redis.io): an in-memory data store used for caching and high-speed data access;
+- [MongoDB](https://www.mongodb.com): a powerful document-oriented database known for its flexibility and scalability;
+- [Cassandra](https://cassandra.apache.org/_/index.html): a distributed, highly available and scalable NoSQL database designed for handling large amounts of data.
 
 
 ## Table Structure
 
 - The *products* table represents a simplified e-commerce product catalog, with the following schema:
-    - Name: the name of the product.
-    - Price: the price of the product.
-    - Availability: whether the product is in stock (true/false).
-    - Description: a brief description of the product.
+    - Name: the name of the product;
+    - Price: the price of the product;
+    - Availability: whether the product is in stock (true/false);
+    - Description: a brief description of the product;
     - Category: the category of the product.
 
 - Workloads:
 
-    - Read-Only Workload: this workload focuses on read operations and is designed to simulate scenarios where users are browsing product listings. It consists mainly of read operations to retrieve product information.
-    - Balanced Read and Update Workload: in this workload, we strike a balance between read and update operations. It simulates scenarios where users not only view products, but also modify product availability or prices. This workload includes a mix of read and update operations.
-    - Update and Insert Workload: it is geared towards assessing the database's ability to handle frequent updates and new product additions. It includes operations to update product availability and add new products to the catalog.
+    - Read-Only Workload: this workload focuses on read operations and is designed to simulate scenarios where users are browsing product listings; it consists mainly of read operations to retrieve product information.
+    - Balanced Read and Update Workload: this workload includes a mix of read and update operations; it simulates scenarios where users not only view products, but also modify product availability or prices. 
+    - Update and Insert Workload: it is geared towards assessing the database's ability to handle frequent updates and new product additions; it includes operations to update product availability and add new products to the catalog.
 
 ## Key Features
 
@@ -41,7 +41,7 @@ In this repository, we focus on benchmarking three prominent NoSQL databases:
 ## Getting Started
 
 ### 1. Start DB instance
-You can also run a Docker container. [Docker](https://www.docker.com/get-started/) is a containerization platform that allows you to run applications, including databases, in isolated environments called containers. 
+You can also run a Docker container. [Docker](https://www.docker.com/) is a containerization platform that allows you to run applications, including databases, in isolated environments called containers. 
 
 ### 2. Install Java and Maven
 YCSB requires the use of Maven 3; if you use Maven 2, you may see [errors such as these](https://github.com/brianfrankcooper/YCSB/issues/406).
