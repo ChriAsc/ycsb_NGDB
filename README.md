@@ -23,13 +23,13 @@ In this repository, we focus on benchmarking three prominent NoSQL databases:
     - Price: the price of the product;
     - Availability: whether the product is in stock (true/false);
     - Description: a brief description of the product;
-    - Category: the category of the product.
+    - Category: the category or type of the product.
 
 - Workloads:
 
-    - Read-Only Workload: this workload focuses on read operations and is designed to simulate scenarios where users are browsing product listings; it consists mainly of read operations to retrieve product information.
-    - Balanced Read and Update Workload: this workload includes a mix of read and update operations; it simulates scenarios where users not only view products, but also modify product availability or prices. 
-    - Update and Insert Workload: it is geared towards assessing the database's ability to handle frequent updates and new product additions; it includes operations to update product availability and add new products to the catalog.
+    - Read-heavy Workload: this workload predominantly focuses on read operations, simulating scenarios where users browse product listings; moreover, it also includes occasional updates to product availability, prices or other attributes (90% Read, 10% Update).
+    - Mixed Workload: it combines various read-modify-write, read, and write operations to mimic a mix of user interactions; Read-Modify-Write (60%) represents operations where users modify product details (e.g. updating availability or price), Read (30%) simulates read-heavy operations as users browse product listings, Write (10%) represents operations where new products are added.
+    - Update-Intensive Workload: it assesses the database's ability to handle frequent updates to product information and it includes a balance of read and write operations, simulating scenarios where products are frequently updated, read and added (70% Update, 15% Read, 15% Write).
 
 ## Key Features
 
