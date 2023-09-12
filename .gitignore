@@ -1,4 +1,5 @@
 *
 !/core/src/main/java/site/ycsb/workloads/CustomWorkload.java
 !/workloads/*
+!/script/*
 !.gitignore
