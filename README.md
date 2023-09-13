@@ -13,7 +13,7 @@ This project is dedicated to benchmarking some of the most popular NoSQL databas
 In this repository, we focus on benchmarking three prominent NoSQL databases:
 - [Redis](https://redis.io): an in-memory data store used for caching and high-speed data access;
 - [MongoDB](https://www.mongodb.com): a powerful document-oriented database known for its flexibility and scalability;
-- [Cassandra](https://cassandra.apache.org/_/index.html): a distributed, highly available and scalable NoSQL database designed for handling large amounts of data.
+- [Cassandra](https://cassandra.apache.org/_/index.html): a distributed, fault-tolerance, highly available and scalable NoSQL database designed for handling large amounts of data.
 
 
 ## Table Structure
@@ -27,9 +27,9 @@ In this repository, we focus on benchmarking three prominent NoSQL databases:
 
 - Workloads:
 
-    - Read-heavy Workload: this workload predominantly focuses on read operations, simulating scenarios where users browse product listings; moreover, it also includes occasional updates to product availability, prices or other attributes (90% Read, 10% Update).
-    - Mixed Workload: it combines various read-modify-write, read, and write operations to mimic a mix of user interactions; Read-Modify-Write (60%) represents operations where users modify product details (e.g. updating availability or price), Read (30%) simulates read-heavy operations as users browse product listings, Write (10%) represents operations where new products are added.
-    - Update-Intensive Workload: it assesses the database's ability to handle frequent updates to product information and it includes a balance of read and write operations, simulating scenarios where products are frequently updated, read and added (70% Update, 15% Read, 15% Write).
+    - Read-heavy Workload (65% Read, 30% Scan, 5% Update): this workload simulates scenarios where users browse product information, customer reviews or order history; it focuses predominantly on read operations, suggesting that the system needs to efficiently handle a large volume of read requests, ensuring fast and reliable access, and scan operations, indicating the need for retrieving a range of data such as searching for items based on specific criteria; moreover, it also includes occasional updates to product attributes.
+    - Updates-intensive Workload (80% Update, 10% Read, 10% Read-Modify-Write): this workload reproduces tasks such as processing customer orders, updating inventory levels or managin product details; given the high proportion of update operations, the system needs to efficiently handle a significant number of requests to modify existing (like updating stock levels, tracking order status, editing prices), on the other hand the small proportion of read operations could indicate users that browse information or reviews, whilst the small proportion of read-modify-write operations indicates scenarios where data needs to be retrieved, modified and then written back to the database.
+    - Insert-intensive Workload (70% insert, 15% Read, 15% Update): this workload simulates scenarios where existing data are retrieved and modified or new information is added to the database; the majority of insert operations suggests a focus on adding new data (like new customer registrations, new products to the catalog, new reviews), the read operations involve recovering data (for example, customer reviews, personalized contents) while the small proportion of update operations suggests the need for modifying existing data such as updating customer profiles, adjusting product quantities.
 
 ## Key Features
 

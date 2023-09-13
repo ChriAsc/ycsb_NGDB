@@ -3,3 +3,4 @@
 !/workloads/*
 !/script/*
 !.gitignore
+!README.md
