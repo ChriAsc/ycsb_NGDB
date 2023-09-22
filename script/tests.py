@@ -12,11 +12,11 @@ def main(database, workload, op_counts):
         run_command = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh run {database} -s -P ../workloads/workload{workload} -p mongodb.url=mongodb://127.0.0.1:27017/ycsb?retryWrites=true "
         cleanup_command = "mongosh < mongoclean.mongodb"
     elif database == "cassandra":
-        load_command_start = f""
-        run_command_start = f""
-        load_command = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh load {database}2-cql -s -P ../workloads/workload{workload} -p hosts=127.0.0.1"
-        run_command = f""
-        cleanup_command = f""
+        load_command_start = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh load {database}2-cql -s -P ../workloads/workload{workload} -p hosts=127.0.0.1 "
+        run_command_start = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh run {database}2-cql -s -P ../workloads/workload{workload} -p hosts=127.0.0.1 "
+        load_command = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh load {database}2-cql -s -P ../workloads/workload{workload} -p hosts=127.0.0.1 "
+        run_command = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh run {database}2-cql -s -P ../workloads/workload{workload} -p hosts=127.0.0.1 "
+        cleanup_command = f"./clean_cassandra.sh"
     elif database == "redis":
         load_command_start = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh load {database} -s -P ../workloads/workload{workload} -p \"redis.host=127.0.0.1\" -p \"redis.port=6379\" "
         run_command_start = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh run {database} -P ../workloads/workload{workload} -p \"redis.host=127.0.0.1\" -p \"redis.port=6379\" "
@@ -51,7 +51,7 @@ if __name__=="__main__":
         op_counts= [200000, 400000, 600000]
     elif workload == "update":
         op_counts = [20000, 40000, 60000]
-    elif workload == "update":
+    elif workload == "insert":
         op_counts = [10000, 25000, 50000]
     else:
         print("HAI SBAGLIATO IL PARAMETRO. Scegli un valore di workload pari alle stringhe \"read\", \"update\" o \"insert\"")
