@@ -18,10 +18,10 @@ def main(database, workload, op_counts):
         run_command = f""
         cleanup_command = f""
     elif database == "redis":
-        load_command_start = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh load {database} -s -P ../workloads/workload{workload} -p \"redis.host=127.0.0.1\" -p \"redis.port=6379\" "
-        run_command_start = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh run {database} -s -P ../workloads/workload{workload} -p \"redis.host=127.0.0.1\" -p \"redis.port=6379\" "
-        load_command = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh load {database} -s -P ../workloads/workload{workload} -p \"redis.host=127.0.0.1\" -p \"redis.port=6379\" "
-        run_command = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh run {database} -s -P ../workloads/workload{workload} -p \"redis.host=127.0.0.1\" -p \"redis.port=6379\" "
+        load_command_start = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh load {database} -s -P workloads/workload{workload} -p \"redis.host=127.0.0.1\" -p \"redis.port=6379\""
+        run_command_start = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh run {database} -P workloads/workload{workload} -p \"redis.host=127.0.0.1\" -p \"redis.port=6379\""
+        load_command = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh load {database} -s -P workloads/workload{workload} -p \"redis.host=127.0.0.1\" -p \"redis.port=6379\""
+        run_command = f"../ycsb-{database}-binding-0.18.0-SNAPSHOT/bin/ycsb.sh run {database} -P workloads/workload{workload} -p \"redis.host=127.0.0.1\" -p \"redis.port=6379\""
         cleanup_command = "docker exec -it redis-container redis-cli FLUSHALL"
     else:
         print("ERRORE. NOME DEL DATABASE ERRATO. PER FAVORE USA \"mongodb\" \"cassandra\" o \"redis\"")
