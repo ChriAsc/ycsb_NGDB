@@ -272,8 +272,8 @@ table=products
 #columnfamily=
 
 # How the latency measurements are presented
-measurementtype=histogram
-#measurementtype=timeseries
+# measurementtype=histogram
+measurementtype=timeseries
 #measurementtype=raw
 # When measurementtype is set to raw, measurements will be output
 # as RAW datapoints in the following csv format:
@@ -310,7 +310,7 @@ measurementtype=histogram
 histogram.buckets=1000
 
 # Granularity for time series (in milliseconds)
-timeseries.granularity=1000
+timeseries.granularity=5000
 
 # Latency reporting.
 #
@@ -364,11 +364,12 @@ timeseries.granularity=1000
 # htrace.span.receiver.classes=org.apache.htrace.impl.HTracedSpanReceiver
 # htrace.htraced.receiver.address=example.com:9075
 # htrace.htraced.error.log.period.ms=10000
-illiseconds)
+
+# The range of latencies to track in the histogram (milliseconds)
 histogram.buckets=1000
 
 # Granularity for time series (in milliseconds)
-timeseries.granularity=1000
+timeseries.granularity=5000
 
 # Latency reporting.
 #
