@@ -2,10 +2,11 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 
-
 threads = [1, 2, 4, 6]
 
 record_counts = [100000, 200000, 300000]
+
+databases = ['cassandra', 'redis', 'mongodb']
 
 def print_throughput():
     op_counts= [200000, 400000, 600000] # Read
@@ -43,6 +44,22 @@ def print_heatmap(workload):
         op_counts = [10000, 25000, 50000]
     else:
         print("HAI SBAGLIATO IL PARAMETRO. Scegli un valore di workload pari alle stringhe \"read\", \"update\" o \"insert\"")
+    vmin = 1000000
+    vmax = 0
+    for database in databases:
+        for record_count in record_counts:
+            for op_count in op_counts:
+                for thread in threads:
+                    results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", skiprows=20, low_memory=False)
+                    ts_result = results[-66:].reset_index(drop=True)
+                    ts_result.columns= ['type','feature','value']
+                    throughput=ts_result[ts_result['feature']==' Throughput(ops/sec)']['value'].values[0].strip()
+                    if throughput<vmin:
+                        vmin = throughput
+                    if throughput>vmax:
+                        vmax = throughput
+                    
+
 
     for record_count in record_counts:
         plt.figure()
@@ -50,7 +67,7 @@ def print_heatmap(workload):
         for op_count in op_counts:
             # To use this script, you need to adapt csv files, so that the first row is the dataframe's header
             for thread in threads:
-                results = pd.read_csv(f"/home/asc/Scrivania/NGDB/redis/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", skiprows=20, low_memory=False)
+                results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", skiprows=20, low_memory=False)
                 ts_result = results[-66:].reset_index(drop=True)
                 ts_result.columns= ['type','feature','value']
                 throughput=ts_result[ts_result['feature']==' Throughput(ops/sec)']['value'].values[0].strip()
@@ -59,9 +76,9 @@ def print_heatmap(workload):
                 print(heatmap_df)
         heatmap_df['throughput'] = pd.to_numeric(heatmap_df['throughput'], errors='coerce')
         heatmap_data = heatmap_df.pivot(index='thread', columns='op_count', values='throughput')
-        sns.heatmap(data=heatmap_data, annot=True, fmt=".1f", cmap='viridis')
+        sns.heatmap(data=heatmap_data, annot=True, fmt=".1f", vmax=vmax, vmin=vmin, cmap='viridis')
         plt.title(f'Nr. of records: {record_count}, workload: {workload}')
-        plt.savefig(f"../redis/redis_heatmap/redis_heatmap_{record_count}_{workload}")
+        #plt.savefig(f"../redis/redis_heatmap/redis_heatmap_{record_count}_{workload}")
 
 
 print_heatmap("read")
