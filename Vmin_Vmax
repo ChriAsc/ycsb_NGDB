@@ -1,0 +1,12 @@
+Vmin for workloadread:
+836
+Vmax for workloadread:
+9518
+Vmin for workloadupdate:
+1454
+Vmax for workloadupdate:
+23352
+Vmin for workloadinsert:
+1112
+Vmax for workloadinsert:
+15700
