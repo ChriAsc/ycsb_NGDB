@@ -8,33 +8,49 @@ record_counts = [100000, 200000, 300000]
 
 databases = ['cassandra', 'redis', 'mongodb']
 
-def print_throughput():
-    op_counts= [200000, 400000, 600000] # Read
+def print_throughput(workload):
+    if workload == 'read':
+        op_count = 200000
+        thread = 1
+        record_count = 100000
+    if workload == 'insert':
+        op_count = 20000
+        thread = 1
+        record_count = 100000
+    if workload == 'update':
+        op_count = 10000
+        thread = 1
+        record_count = 100000
+    
+    num_expected_fields = 3
+    # op_counts= [200000, 400000, 600000] # Read
     # op_counts = [20000, 40000, 60000]   # Update
     # op_counts = [10000, 25000, 50000]   # Insert
 
-    for op_count in op_counts:
+    # for op_count in op_counts:
         # To use this script, you need to adapt csv files, so that the first row is the dataframe's header
-        for thread in threads:
-            plt.figure()
+        # for thread in threads:
+    plt.figure()
+    for database in databases:
+        results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", names=['operation','timestamp(ms)','latency(us)'],low_memory=False)
+        results = results[results.apply(lambda x: x.count() == num_expected_fields, axis=1)]
+        results.columns= ['operation','timestamp(ms)','latency(us)']
+        ts_result = results[:-66]
+        ts_result = ts_result[ts_result['timestamp(ms)']!=' timestamp(ms)']
+        ts_result['timestamp(ms)'] = ts_result['timestamp(ms)'].astype(float)
+        ts_result['timestamp(ms)'] = pd.to_datetime(ts_result['timestamp(ms)'], unit='ms')
+        ts_result.sort_values(by='timestamp(ms)')
+        ts_result = ts_result[['operation', 'timestamp(ms)']]
+        throughput_per_second = ts_result.resample('S', on='timestamp(ms)').agg({'operation':'count'})
+        throughput_per_second['TimeElapsed'] = (throughput_per_second.index - throughput_per_second.index[0]).total_seconds()
+        throughput_per_second['TimeElapsed'] = throughput_per_second['TimeElapsed'].astype(int)  # Cast to integers
+        throughput_per_second = throughput_per_second.set_index('TimeElapsed')
+        sns.lineplot(data=throughput_per_second, legend='brief', label=database, x=throughput_per_second.index, y=throughput_per_second['operation'])
+    plt.xlabel('seconds (sec)')
+    plt.ylabel('throughput (ops/sec)')
+    plt.title(f'Throughput: {op_count} operation, {thread} threads, {record_count} records')
 
-            results = pd.read_csv(f"/home/asc/Scrivania/NGDB/redis/workloadread//output_run_100000_{op_count}_{thread}.csv", header=0, low_memory=False)
-            results.columns= ['operation','timestamp(ms)','latency(us)']
-            ts_result = results[:-66]
-            ts_result = ts_result[ts_result['timestamp(ms)']!=' timestamp(ms)']
-            ts_result['timestamp(ms)'] = pd.to_datetime(ts_result['timestamp(ms)'], unit='ms')
-            ts_result.sort_values(by='timestamp(ms)')
-            ts_result = ts_result[['operation', 'timestamp(ms)']]
-            throughput_per_second = ts_result.resample('S', on='timestamp(ms)').agg({'operation':'count'})
-            throughput_per_second['TimeElapsed'] = (throughput_per_second.index - throughput_per_second.index[0]).total_seconds()
-            throughput_per_second['TimeElapsed'] = throughput_per_second['TimeElapsed'].astype(int)  # Cast to integers
-            throughput_per_second = throughput_per_second.set_index('TimeElapsed')
-
-            sns.lineplot(data=throughput_per_second, x=throughput_per_second.index, y=throughput_per_second['operation']).set(title=f'{op_count}_{thread}')
-
-    plt.show()
-
-def print_heatmap(workload):
+def print_heatmap(workload, vmin, vmax):
     # Workload: "read", "insert", "update"
     if workload == "read":
         op_counts= [200000, 400000, 600000]
@@ -44,45 +60,101 @@ def print_heatmap(workload):
         op_counts = [10000, 25000, 50000]
     else:
         print("HAI SBAGLIATO IL PARAMETRO. Scegli un valore di workload pari alle stringhe \"read\", \"update\" o \"insert\"")
-    vmin = 1000000
-    vmax = 0
+    # vmin = 1000000
+    # vmax = 0
+    # for database in databases:
+    #     for record_count in record_counts:
+    #         for op_count in op_counts:
+    #             for thread in threads:
+    #                 results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", skiprows=20, low_memory=False)
+    #                 ts_result = results[-66:].reset_index(drop=True)
+    #                 ts_result.columns= ['type','feature','value']
+    #                 throughput=ts_result[ts_result['feature']==' Throughput(ops/sec)']['value'].values[0].strip()
+    #                 if round(float(throughput))<vmin:
+    #                     vmin = round(float(throughput))
+    #                 if round(float(throughput))>vmax:
+    #                     vmax = round(float(throughput)) + 1
+    # print(f"Vmin for workload{workload}:\n{vmin}")
+    # print(f"Vmax for workload{workload}:\n{vmax}")
+                    
+    fig, axes = plt.subplots(3,3,figsize=(12,12))
+    i = 0
+
     for database in databases:
         for record_count in record_counts:
+            # plt.figure()
+            heatmap_df = pd.DataFrame(columns=['op_count', 'thread', 'throughput'])
             for op_count in op_counts:
+                # To use this script, you need to adapt csv files, so that the first row is the dataframe's header
                 for thread in threads:
                     results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", skiprows=20, low_memory=False)
                     ts_result = results[-66:].reset_index(drop=True)
                     ts_result.columns= ['type','feature','value']
                     throughput=ts_result[ts_result['feature']==' Throughput(ops/sec)']['value'].values[0].strip()
-                    if throughput<vmin:
-                        vmin = throughput
-                    if throughput>vmax:
-                        vmax = throughput
-                    
+                    temp_heatmap_df = pd.DataFrame([[op_count, thread, throughput]], columns=['op_count', 'thread', 'throughput'])
+                    heatmap_df = pd.concat([heatmap_df, temp_heatmap_df])
+                    print(heatmap_df)
+            heatmap_df['throughput'] = pd.to_numeric(heatmap_df['throughput'], errors='coerce')
+            heatmap_data = heatmap_df.pivot(index='thread', columns='op_count', values='throughput')
+            row = i//  3
+            col = i % 3
+            ax = axes[row, col]
+            i = i+1
+            sns.heatmap(data=heatmap_data, ax=ax, annot=True, fmt=".1f", vmax=vmax, vmin=vmin, cmap='viridis')
+            ax.set_title(f"Nr. of records: {record_count}, workload: {workload}, database: {database}")
+            #plt.savefig(f"../redis/redis_heatmap/redis_heatmap_{record_count}_{workload}")
 
 
-    for record_count in record_counts:
-        plt.figure()
-        heatmap_df = pd.DataFrame(columns=['op_count', 'thread', 'throughput'])
-        for op_count in op_counts:
-            # To use this script, you need to adapt csv files, so that the first row is the dataframe's header
-            for thread in threads:
-                results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", skiprows=20, low_memory=False)
-                ts_result = results[-66:].reset_index(drop=True)
-                ts_result.columns= ['type','feature','value']
-                throughput=ts_result[ts_result['feature']==' Throughput(ops/sec)']['value'].values[0].strip()
-                temp_heatmap_df = pd.DataFrame([[op_count, thread, throughput]], columns=['op_count', 'thread', 'throughput'])
-                heatmap_df = pd.concat([heatmap_df, temp_heatmap_df])
-                print(heatmap_df)
-        heatmap_df['throughput'] = pd.to_numeric(heatmap_df['throughput'], errors='coerce')
-        heatmap_data = heatmap_df.pivot(index='thread', columns='op_count', values='throughput')
-        sns.heatmap(data=heatmap_data, annot=True, fmt=".1f", vmax=vmax, vmin=vmin, cmap='viridis')
-        plt.title(f'Nr. of records: {record_count}, workload: {workload}')
-        #plt.savefig(f"../redis/redis_heatmap/redis_heatmap_{record_count}_{workload}")
+def print_boxplot(workload):
+    if workload == 'read':
+        op_count = 200000
+        thread = 1
+        record_count = 100000
+    if workload == 'insert':
+        op_count = 20000
+        thread = 1
+        record_count = 100000
+    if workload == 'update':
+        op_count = 10000
+        thread = 1
+        record_count = 100000
+    
+    num_expected_fields = 3
+    # op_counts= [200000, 400000, 600000] # Read
+    # op_counts = [20000, 40000, 60000]   # Update
+    # op_counts = [10000, 25000, 50000]   # Insert
 
+    # for op_count in op_counts:
+        # To use this script, you need to adapt csv files, so that the first row is the dataframe's header
+        # for thread in threads:
+    plt.figure()
+    for database in databases:
+        results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", names=['operation','timestamp(ms)','latency(us)'],low_memory=False)
+        results = results[results.apply(lambda x: x.count() == num_expected_fields, axis=1)]
+        results.columns= ['operation','timestamp(ms)','latency(us)']
+        ts_result = results[:-66]
+        ts_result = ts_result[ts_result['timestamp(ms)']!=' timestamp(ms)']
+        ts_result = ts_result[ts_result['operation']!='CLEANUP']
+        ts_result = ts_result[['operation', 'latency(us)']]
+        ts_result['latency(us)'] = ts_result['latency(us)'].astype(int)
+        ts_result['database'] = database
+        if database == 'mongodb':
+            sns.boxplot(data=ts_result, x='database',y='latency(us)', legend='brief', hue='operation', log_scale=True)
+            # sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, log_scale=True) 
+        else:
+            # sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, log_scale=True)
+            sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, hue='operation', log_scale=True)
+    plt.xlabel('Databases')
+    plt.ylabel('Latency')
+    plt.title(f'Latencies\' boxplots: {op_count} operation, {thread} threads, {record_count} records')
+    
+# print_heatmap("read", vmin=800, vmax=10000)
+# print_heatmap("update", vmin=1400, vmax=24000)
+# print_heatmap("insert", vmin=1000, vmax=16000)
+# plt.tight_layout()
 
-print_heatmap("read")
-print_heatmap("update")
-print_heatmap("insert")
+# print_throughput("read")
 
-# plt.show()
+print_boxplot("read")
+plt.show()
+print('ok')
