@@ -203,8 +203,8 @@ def print_general_barplot():
         ax = axes[i]
         i = i+1
         sns.barplot(runtimes_df, ax=ax, x='workload', y='runtime(mean)', hue='database')
-        ax.xlabel('Workload')
-        ax.ylabel('Runtime (s)')
+        ax.set_xlabel('Workload')
+        ax.set_ylabel('Runtime (s)')
     fig.suptitle('Mean Runtime')
     plt.tight_layout()
 
