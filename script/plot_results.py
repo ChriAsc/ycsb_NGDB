@@ -44,7 +44,8 @@ def print_throughput(workload):
         # Filtering only rows with 3 fields
         results = results[results.apply(lambda x: x.count() == num_expected_fields, axis=1)]
         results.columns= ['operation','timestamp(ms)','latency(us)']    # not necessary
-        ts_result = results[:-66]   # to check
+        ts_result = results[results['operation'].str.contains(']') == False]
+        # ts_result = results[:-66]   # to check
         # Since some headers are considered in read_csv, we filter them
         ts_result = ts_result[ts_result['timestamp(ms)']!=' timestamp(ms)']
         # Casting timestamp into float as it is convertend into datetime
@@ -94,17 +95,17 @@ def print_heatmap(workload, vmin, vmax):
     # print(f"Vmin for workload{workload}:\n{vmin}")
     # print(f"Vmax for workload{workload}:\n{vmax}")
                     
-    fig, axes = plt.subplots(3,3,figsize=(12,12))
+    fig, axes = plt.subplots(3,3,figsize=(10,10))
     i = 0
 
     for database in databases:
         for record_count in record_counts:
             # plt.figure()
-            heatmap_df = pd.DataFrame(columns=['op_count', 'thread', 'throughput'])
+            heatmap_df = pd.DataFrame(columns=['op_count', 'thread', 'throughput', 'latency'])
             for op_count in op_counts:
                 # To use this script, you need to adapt csv files, so that the first row is the dataframe's header
                 for thread in threads:
-                    results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", skiprows=20, low_memory=False)
+                    results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", names=['operation','timestamp(ms)','latency(us)'],skiprows=20, low_memory=False)
                     # ts_result = results[-66:].reset_index(drop=True)
                     ts_result = results[results['operation'].str.contains(']') == True]
                     ts_result = ts_result.reset_index(drop=True)
@@ -115,13 +116,14 @@ def print_heatmap(workload, vmin, vmax):
                     print(heatmap_df)
             heatmap_df['throughput'] = pd.to_numeric(heatmap_df['throughput'], errors='coerce')
             heatmap_data = heatmap_df.pivot(index='thread', columns='op_count', values='throughput')
-            row = i//  3
+            row = i //  3
             col = i % 3
             ax = axes[row, col]
             i = i+1
             sns.heatmap(data=heatmap_data, ax=ax, annot=True, fmt=".1f", vmax=vmax, vmin=vmin, cmap='viridis')
-            ax.set_title(f"Nr. of records: {record_count}, workload: {workload}, database: {database}")
-            #plt.savefig(f"../redis/redis_heatmap/redis_heatmap_{record_count}_{workload}")
+            ax.set_title(f"{record_count} records, workload{workload}, {database}", fontsize=10)
+    plt.tight_layout()
+    #plt.savefig(f"../redis/redis_heatmap/redis_heatmap_{record_count}_{workload}")
 
 
 def print_boxplot(workload):
@@ -167,41 +169,50 @@ def print_boxplot(workload):
         else:
             # sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, log_scale=True)
             sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, hue='operation', log_scale=True)
-    plt.xlabel('Databases')
-    plt.ylabel('Latency')
+    plt.xlabel('Database')
+    plt.ylabel('Latency (us)')
     plt.title(f'Latencies\' boxplots: {op_count} operation, {thread} threads, {record_count} records')
 
 def print_general_barplot():
-    runtimes_df = pd.DataFrame(columns=['workload', 'database', 'runtime(mean)', 'runtime(median)'])
+    fig, axes = plt.subplots(1,3,figsize=(12,6))
+    i=0
+    
     for workload in workloads:
+        runtimes_df = pd.DataFrame(columns=['workload', 'database', 'runtime(mean)', 'runtime(median)'])
         for database in databases:
-            runtimes = np.array()
+            runtimes = np.array([])
             for record_count in record_counts:
                 for op_count in wl_op_counts[workload]:
                     for thread in threads:
                         results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", names=['operation','timestamp(ms)','latency(us)'],low_memory=False)
-                        results = results[results.apply(lambda x: x.count() == num_expected_fields, axis=1)]
+                        # results = results[results.apply(lambda x: x.count() == num_expected_fields, axis=1)]
                         results.columns= ['operation','timestamp(ms)','latency(us)']
+                        results = results[-200:]
                         ts_result = results[results['operation'].str.contains(']') == True]
                         ts_result = ts_result.reset_index(drop=True)
                         ts_result.columns= ['type','feature','value']
                         runtime=ts_result[ts_result['feature']==' RunTime(ms)']['value'].values[0].strip()
+                        # Resampling to seconds
+                        runtime=int(runtime)/1000
                         runtimes = np.append(runtimes, runtime)
             runtime_mean = np.mean(runtimes)
             runtime_median = np.median(runtimes)
             runtimes_df.loc[len(runtimes_df.index)] = [workload, database, runtime_mean, runtime_median]
-    
-    plt.title('Mean Runtime(ms)')
-    sns.barplot(runtimes_df, x='workload', y='runtime(mean)', hue='database')
-
-
+            print(f"Workload{workload} successfully processed with {database}!")
+        
+        ax = axes[i]
+        i = i+1
+        sns.barplot(runtimes_df, ax=ax, x='workload', y='runtime(mean)', hue='database')
+        ax.xlabel('Workload')
+        ax.ylabel('Runtime (s)')
+    fig.suptitle('Mean Runtime')
+    plt.tight_layout()
 
 
 
 # print_heatmap("read", vmin=800, vmax=10000)
 # print_heatmap("update", vmin=1400, vmax=24000)
 # print_heatmap("insert", vmin=1000, vmax=16000)
-# plt.tight_layout()
 
 # print_throughput("read")
 # print_throughput("update")
@@ -212,6 +223,7 @@ def print_general_barplot():
 # print_boxplot("insert")
 
 print_general_barplot()
+
 
 plt.show()
 print('ok')
