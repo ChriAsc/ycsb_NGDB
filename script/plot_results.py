@@ -1,6 +1,7 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 threads = [1, 2, 4, 6]
 
@@ -8,6 +9,9 @@ record_counts = [100000, 200000, 300000]
 
 databases = ['cassandra', 'redis', 'mongodb']
 
+workloads = ['read', 'insert', 'update']
+wl_op_counts = {'read': [200000, 400000, 600000], 'insert': [10000, 25000, 50000], 'update': [20000, 40000, 60000]}
+num_expected_fields = 3
 # op_counts= [200000, 400000, 600000] # Read
 # op_counts = [20000, 40000, 60000]   # Update
 # op_counts = [10000, 25000, 50000]   # Insert
@@ -102,7 +106,7 @@ def print_heatmap(workload, vmin, vmax):
                 for thread in threads:
                     results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", skiprows=20, low_memory=False)
                     # ts_result = results[-66:].reset_index(drop=True)
-                    ts_result = results[results['operation'].str.contains(']') == False]
+                    ts_result = results[results['operation'].str.contains(']') == True]
                     ts_result = ts_result.reset_index(drop=True)
                     ts_result.columns= ['type','feature','value']
                     throughput=ts_result[ts_result['feature']==' Throughput(ops/sec)']['value'].values[0].strip()
@@ -167,6 +171,33 @@ def print_boxplot(workload):
     plt.ylabel('Latency')
     plt.title(f'Latencies\' boxplots: {op_count} operation, {thread} threads, {record_count} records')
 
+def print_general_barplot():
+    runtimes_df = pd.DataFrame(columns=['workload', 'database', 'runtime(mean)', 'runtime(median)'])
+    for workload in workloads:
+        for database in databases:
+            runtimes = np.array()
+            for record_count in record_counts:
+                for op_count in wl_op_counts[workload]:
+                    for thread in threads:
+                        results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", names=['operation','timestamp(ms)','latency(us)'],low_memory=False)
+                        results = results[results.apply(lambda x: x.count() == num_expected_fields, axis=1)]
+                        results.columns= ['operation','timestamp(ms)','latency(us)']
+                        ts_result = results[results['operation'].str.contains(']') == True]
+                        ts_result = ts_result.reset_index(drop=True)
+                        ts_result.columns= ['type','feature','value']
+                        runtime=ts_result[ts_result['feature']==' RunTime(ms)']['value'].values[0].strip()
+                        runtimes = np.append(runtimes, runtime)
+            runtime_mean = np.mean(runtimes)
+            runtime_median = np.median(runtimes)
+            runtimes_df.loc[len(runtimes_df.index)] = [workload, database, runtime_mean, runtime_median]
+    
+    plt.title('Mean Runtime(ms)')
+    sns.barplot(runtimes_df, x='workload', y='runtime(mean)', hue='database')
+
+
+
+
+
 # print_heatmap("read", vmin=800, vmax=10000)
 # print_heatmap("update", vmin=1400, vmax=24000)
 # print_heatmap("insert", vmin=1000, vmax=16000)
@@ -176,9 +207,11 @@ def print_boxplot(workload):
 # print_throughput("update")
 # print_throughput("insert")
 
-print_boxplot("read")
-print_boxplot("update")
-print_boxplot("insert")
+# print_boxplot("read")
+# print_boxplot("update")
+# print_boxplot("insert")
+
+print_general_barplot()
 
 plt.show()
 print('ok')
