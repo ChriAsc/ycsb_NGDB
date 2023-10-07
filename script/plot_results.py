@@ -8,48 +8,60 @@ record_counts = [100000, 200000, 300000]
 
 databases = ['cassandra', 'redis', 'mongodb']
 
+# op_counts= [200000, 400000, 600000] # Read
+# op_counts = [20000, 40000, 60000]   # Update
+# op_counts = [10000, 25000, 50000]   # Insert
+
+# Function to print a lineplot with databases' throughput, given the workload, nr. of operations, nr. of threads and nr. of records.
 def print_throughput(workload):
     if workload == 'read':
         op_count = 200000
         thread = 1
         record_count = 100000
-    if workload == 'insert':
-        op_count = 20000
-        thread = 1
-        record_count = 100000
-    if workload == 'update':
+    elif workload == 'insert':
         op_count = 10000
         thread = 1
         record_count = 100000
-    
+    elif workload == 'update':
+        op_count = 20000
+        thread = 1
+        record_count = 100000
+    else:
+        print("HAI SBAGLIATO IL PARAMETRO. Scegli un valore di workload pari alle stringhe \"read\", \"update\" o \"insert\"")
+  
+    # Reading from csv, this variable set the number of fields
     num_expected_fields = 3
-    # op_counts= [200000, 400000, 600000] # Read
-    # op_counts = [20000, 40000, 60000]   # Update
-    # op_counts = [10000, 25000, 50000]   # Insert
 
-    # for op_count in op_counts:
-        # To use this script, you need to adapt csv files, so that the first row is the dataframe's header
-        # for thread in threads:
     plt.figure()
+    # Loop through the databases
     for database in databases:
+        # Dataframe
         results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", names=['operation','timestamp(ms)','latency(us)'],low_memory=False)
+        # Filtering only rows with 3 fields
         results = results[results.apply(lambda x: x.count() == num_expected_fields, axis=1)]
-        results.columns= ['operation','timestamp(ms)','latency(us)']
-        ts_result = results[:-66]
+        results.columns= ['operation','timestamp(ms)','latency(us)']    # not necessary
+        ts_result = results[:-66]   # to check
+        # Since some headers are considered in read_csv, we filter them
         ts_result = ts_result[ts_result['timestamp(ms)']!=' timestamp(ms)']
+        # Casting timestamp into float as it is convertend into datetime
         ts_result['timestamp(ms)'] = ts_result['timestamp(ms)'].astype(float)
         ts_result['timestamp(ms)'] = pd.to_datetime(ts_result['timestamp(ms)'], unit='ms')
+        # Sorting values by timestamp
         ts_result.sort_values(by='timestamp(ms)')
         ts_result = ts_result[['operation', 'timestamp(ms)']]
+        # Resampling second by second
         throughput_per_second = ts_result.resample('S', on='timestamp(ms)').agg({'operation':'count'})
+        # Computing absolute time
         throughput_per_second['TimeElapsed'] = (throughput_per_second.index - throughput_per_second.index[0]).total_seconds()
         throughput_per_second['TimeElapsed'] = throughput_per_second['TimeElapsed'].astype(int)  # Cast to integers
         throughput_per_second = throughput_per_second.set_index('TimeElapsed')
+        # Plotting
         sns.lineplot(data=throughput_per_second, legend='brief', label=database, x=throughput_per_second.index, y=throughput_per_second['operation'])
     plt.xlabel('seconds (sec)')
     plt.ylabel('throughput (ops/sec)')
     plt.title(f'Throughput: {op_count} operation, {thread} threads, {record_count} records')
 
+# Function to print a heatmap with databases' throughput, given the workload, nr. of operation and vmin/vmax (for the map's scale).
 def print_heatmap(workload, vmin, vmax):
     # Workload: "read", "insert", "update"
     if workload == "read":
@@ -60,6 +72,7 @@ def print_heatmap(workload, vmin, vmax):
         op_counts = [10000, 25000, 50000]
     else:
         print("HAI SBAGLIATO IL PARAMETRO. Scegli un valore di workload pari alle stringhe \"read\", \"update\" o \"insert\"")
+
     # vmin = 1000000
     # vmax = 0
     # for database in databases:
@@ -88,7 +101,9 @@ def print_heatmap(workload, vmin, vmax):
                 # To use this script, you need to adapt csv files, so that the first row is the dataframe's header
                 for thread in threads:
                     results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", skiprows=20, low_memory=False)
-                    ts_result = results[-66:].reset_index(drop=True)
+                    # ts_result = results[-66:].reset_index(drop=True)
+                    ts_result = results[results['operation'].str.contains(']') == False]
+                    ts_result = ts_result.reset_index(drop=True)
                     ts_result.columns= ['type','feature','value']
                     throughput=ts_result[ts_result['feature']==' Throughput(ops/sec)']['value'].values[0].strip()
                     temp_heatmap_df = pd.DataFrame([[op_count, thread, throughput]], columns=['op_count', 'thread', 'throughput'])
@@ -110,29 +125,33 @@ def print_boxplot(workload):
         op_count = 200000
         thread = 1
         record_count = 100000
-    if workload == 'insert':
-        op_count = 20000
-        thread = 1
-        record_count = 100000
-    if workload == 'update':
+    elif workload == 'insert':
         op_count = 10000
         thread = 1
         record_count = 100000
-    
+    elif workload == 'update':
+        op_count = 20000
+        thread = 1
+        record_count = 100000
+    else:
+        print("HAI SBAGLIATO IL PARAMETRO. Scegli un valore di workload pari alle stringhe \"read\", \"update\" o \"insert\"")
+  
+    # Reading from csv, this variable set the number of fields
     num_expected_fields = 3
-    # op_counts= [200000, 400000, 600000] # Read
-    # op_counts = [20000, 40000, 60000]   # Update
-    # op_counts = [10000, 25000, 50000]   # Insert
 
-    # for op_count in op_counts:
-        # To use this script, you need to adapt csv files, so that the first row is the dataframe's header
-        # for thread in threads:
     plt.figure()
+
+    # Loop through the databases
     for database in databases:
+        # Dataframe
         results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", names=['operation','timestamp(ms)','latency(us)'],low_memory=False)
+        # Filtering only rows with 3 fields
         results = results[results.apply(lambda x: x.count() == num_expected_fields, axis=1)]
         results.columns= ['operation','timestamp(ms)','latency(us)']
-        ts_result = results[:-66]
+        # ts_result = results[:-66]
+        ts_result = results[results['operation'].str.contains(']') == False]
+        ts_result = ts_result.reset_index(drop=True)
+        # Since some headers are considered in read_csv, we filter them
         ts_result = ts_result[ts_result['timestamp(ms)']!=' timestamp(ms)']
         ts_result = ts_result[ts_result['operation']!='CLEANUP']
         ts_result = ts_result[['operation', 'latency(us)']]
@@ -147,14 +166,19 @@ def print_boxplot(workload):
     plt.xlabel('Databases')
     plt.ylabel('Latency')
     plt.title(f'Latencies\' boxplots: {op_count} operation, {thread} threads, {record_count} records')
-    
+
 # print_heatmap("read", vmin=800, vmax=10000)
 # print_heatmap("update", vmin=1400, vmax=24000)
 # print_heatmap("insert", vmin=1000, vmax=16000)
 # plt.tight_layout()
 
 # print_throughput("read")
+# print_throughput("update")
+# print_throughput("insert")
 
 print_boxplot("read")
+print_boxplot("update")
+print_boxplot("insert")
+
 plt.show()
 print('ok')
