@@ -64,7 +64,11 @@ def print_throughput(workload):
         sns.lineplot(data=throughput_per_second, legend='brief', label=database, x=throughput_per_second.index, y=throughput_per_second['operation'])
     plt.xlabel('seconds (sec)')
     plt.ylabel('throughput (ops/sec)')
-    plt.title(f'Throughput: {op_count} operation, {thread} threads, {record_count} records')
+    plt.title(f'Throughput: {op_count} operations, {thread} threads, {record_count} records')
+    manager = plt.get_current_fig_manager()
+    manager.full_screen_toggle()
+    # plt.savefig(f"../Plots/Throughput_{record_count}_{op_count}_{thread}", bbox_inches='tight', dpi=500)
+    print("Throughput Lineplot was successfully saved!")
 
 # Function to print a heatmap with databases' throughput, given the workload, nr. of operation and vmin/vmax (for the map's scale).
 def print_throughput_heatmap(workload, vmin, vmax):
@@ -124,7 +128,10 @@ def print_throughput_heatmap(workload, vmin, vmax):
             sns.heatmap(data=heatmap_data, ax=ax, annot=True, fmt=".1f", vmax=vmax, vmin=vmin, cmap='viridis')
             ax.set_title(f"{record_count} records, workload{workload}, {database}", fontsize=10)
     plt.tight_layout()
-    #plt.savefig(f"../redis/redis_heatmap/redis_heatmap_{record_count}_{workload}")
+    manager = plt.get_current_fig_manager()
+    manager.full_screen_toggle()
+    # plt.savefig(f"../Plots/Heatmap_Throughput_{workload}", bbox_inches='tight', dpi=500)
+    print("Throughput Heatmap was successfully saved!")
 
 
 def print_latency_heatmap(workload, vmin, vmax):
@@ -191,7 +198,10 @@ def print_latency_heatmap(workload, vmin, vmax):
             sns.heatmap(data=heatmap_data, ax=ax, annot=True, fmt=".1f", vmax=vmax, vmin=vmin, cmap='viridis')
             ax.set_title(f"{record_count} records, workload{workload}, {database}", fontsize=10)
     plt.tight_layout()
-    #plt.savefig(f"../redis/redis_heatmap/redis_heatmap_{record_count}_{workload}")
+    manager = plt.get_current_fig_manager()
+    manager.full_screen_toggle()
+    # plt.savefig(f"../Plots/Heatmap_Latency_{workload}", bbox_inches='tight', dpi=500)
+    print("Latency Heatmap was successfully saved!")
 
 
 def print_boxplot(workload):
@@ -239,7 +249,11 @@ def print_boxplot(workload):
             sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, hue='operation', log_scale=True)
     plt.xlabel('Database')
     plt.ylabel('Latency (us)')
-    plt.title(f'Latencies\' boxplots: {op_count} operation, {thread} threads, {record_count} records')
+    plt.title(f'Latencies\' boxplots: {op_count} operations, {thread} threads, {record_count} records')
+    manager = plt.get_current_fig_manager()
+    manager.full_screen_toggle()
+    # plt.savefig(f"../Plots/Boxplot_Latency_{workload}", bbox_inches='tight', dpi=500)
+    print("Latency Boxplot was successfully saved!")
 
 def print_general_barplot():
     fig, axes = plt.subplots(1,3,figsize=(12,6))
@@ -275,26 +289,31 @@ def print_general_barplot():
         ax.set_ylabel('Runtime (s)')
     fig.suptitle('Mean Runtime')
     plt.tight_layout()
+    manager = plt.get_current_fig_manager()
+    manager.full_screen_toggle()
+    # plt.savefig(f"../Plots/Barplot_MeanRuntime_{workload}", bbox_inches='tight', dpi=500)
+    print("Runtime Barplot was successfully saved!")
 
 
 
-# print_throughput_heatmap("read", vmin=800, vmax=10000)
-# print_throughput_heatmap("update", vmin=1400, vmax=24000)
-# print_throughput_heatmap("insert", vmin=1000, vmax=16000)
+
+print_throughput_heatmap("read", vmin=800, vmax=10000)
+print_throughput_heatmap("update", vmin=1400, vmax=24000)
+print_throughput_heatmap("insert", vmin=1000, vmax=16000)
 
 print_latency_heatmap("read", vmin=200, vmax=2500)
 print_latency_heatmap("update", vmin=0, vmax=1600)
 print_latency_heatmap("insert", vmin=100, vmax=2100)
 
-# print_throughput("read")
-# print_throughput("update")
-# print_throughput("insert")
+print_throughput("read")
+print_throughput("update")
+print_throughput("insert")
 
-# print_boxplot("read")
-# print_boxplot("update")
-# print_boxplot("insert")
+print_boxplot("read")
+print_boxplot("update")
+print_boxplot("insert")
 
-# print_general_barplot()
+print_general_barplot()
 
 
 plt.show()
