@@ -67,7 +67,7 @@ def print_throughput(workload):
     plt.title(f'Throughput: {op_count} operation, {thread} threads, {record_count} records')
 
 # Function to print a heatmap with databases' throughput, given the workload, nr. of operation and vmin/vmax (for the map's scale).
-def print_heatmap(workload, vmin, vmax):
+def print_throughput_heatmap(workload, vmin, vmax):
     # Workload: "read", "insert", "update"
     if workload == "read":
         op_counts= [200000, 400000, 600000]
@@ -101,21 +101,89 @@ def print_heatmap(workload, vmin, vmax):
     for database in databases:
         for record_count in record_counts:
             # plt.figure()
-            heatmap_df = pd.DataFrame(columns=['op_count', 'thread', 'throughput', 'latency'])
+            heatmap_df = pd.DataFrame(columns=['op_count', 'thread', 'throughput'])
             for op_count in op_counts:
                 # To use this script, you need to adapt csv files, so that the first row is the dataframe's header
                 for thread in threads:
                     results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", names=['operation','timestamp(ms)','latency(us)'],skiprows=20, low_memory=False)
-                    # ts_result = results[-66:].reset_index(drop=True)
+                    # Throughput
                     ts_result = results[results['operation'].str.contains(']') == True]
                     ts_result = ts_result.reset_index(drop=True)
                     ts_result.columns= ['type','feature','value']
                     throughput=ts_result[ts_result['feature']==' Throughput(ops/sec)']['value'].values[0].strip()
+                    # Complete dataframe
                     temp_heatmap_df = pd.DataFrame([[op_count, thread, throughput]], columns=['op_count', 'thread', 'throughput'])
                     heatmap_df = pd.concat([heatmap_df, temp_heatmap_df])
-                    print(heatmap_df)
+                    # print(heatmap_df)
             heatmap_df['throughput'] = pd.to_numeric(heatmap_df['throughput'], errors='coerce')
             heatmap_data = heatmap_df.pivot(index='thread', columns='op_count', values='throughput')
+            row = i //  3
+            col = i % 3
+            ax = axes[row, col]
+            i = i+1
+            sns.heatmap(data=heatmap_data, ax=ax, annot=True, fmt=".1f", vmax=vmax, vmin=vmin, cmap='viridis')
+            ax.set_title(f"{record_count} records, workload{workload}, {database}", fontsize=10)
+    plt.tight_layout()
+    #plt.savefig(f"../redis/redis_heatmap/redis_heatmap_{record_count}_{workload}")
+
+
+def print_latency_heatmap(workload, vmin, vmax):
+    # Workload: "read", "insert", "update"
+    if workload == "read":
+        op_counts= [200000, 400000, 600000]
+    elif workload == "update":
+        op_counts = [20000, 40000, 60000]
+    elif workload == "insert":
+        op_counts = [10000, 25000, 50000]
+    else:
+        print("HAI SBAGLIATO IL PARAMETRO. Scegli un valore di workload pari alle stringhe \"read\", \"update\" o \"insert\"")
+
+    # vmin = 1000000
+    # vmax = 0
+    # for database in databases:
+    #     for record_count in record_counts:
+    #         for op_count in op_counts:
+    #             for thread in threads:
+    #                 results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", names=['operation','timestamp(ms)','latency(us)'],skiprows=20, low_memory=False)
+    #                 l_result = results[results['operation'].str.contains(']') == False]
+    #                 l_result = l_result.reset_index(drop=True)
+
+    #                 l_result = l_result[l_result['timestamp(ms)']!=' timestamp(ms)']
+    #                 l_result = l_result[l_result['operation'] != 'CLEANUP']
+    #                 latencies = l_result['latency(us)'].astype(int)
+    #                 average = latencies.sum()/len(latencies)
+    #                 if round(float(average))<vmin:
+    #                     vmin = round(float(average))
+    #                 if round(float(average))>vmax:
+    #                     vmax = round(float(average)) + 1
+    # print(f"Vmin for workload{workload}:\n{vmin}")
+    # print(f"Vmax for workload{workload}:\n{vmax}")
+                    
+    fig, axes = plt.subplots(3,3,figsize=(10,10))
+    i = 0
+
+    for database in databases:
+        for record_count in record_counts:
+            # plt.figure()
+            heatmap_df = pd.DataFrame(columns=['op_count', 'thread', 'latency'])
+            for op_count in op_counts:
+                # To use this script, you need to adapt csv files, so that the first row is the dataframe's header
+                for thread in threads:
+                    results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", names=['operation','timestamp(ms)','latency(us)'],skiprows=20, low_memory=False)
+                    # Latency
+                    l_result = results[results['operation'].str.contains(']') == False]
+                    l_result = l_result.reset_index(drop=True)
+                    # Since some headers are considered in read_csv, we filter them
+                    l_result = l_result[l_result['timestamp(ms)']!=' timestamp(ms)']
+                    l_result = l_result[l_result['operation'] != 'CLEANUP']
+                    latencies = l_result['latency(us)'].astype(int)
+                    average = latencies.sum()/len(latencies)
+                    # Complete dataframe
+                    temp_heatmap_df = pd.DataFrame([[op_count, thread, average]], columns=['op_count', 'thread', 'latency'])
+                    heatmap_df = pd.concat([heatmap_df, temp_heatmap_df])
+                    # print(heatmap_df)
+            heatmap_df['latency'] = pd.to_numeric(heatmap_df['latency'], errors='coerce')
+            heatmap_data = heatmap_df.pivot(index='thread', columns='op_count', values='latency')
             row = i //  3
             col = i % 3
             ax = axes[row, col]
@@ -210,9 +278,13 @@ def print_general_barplot():
 
 
 
-# print_heatmap("read", vmin=800, vmax=10000)
-# print_heatmap("update", vmin=1400, vmax=24000)
-# print_heatmap("insert", vmin=1000, vmax=16000)
+# print_throughput_heatmap("read", vmin=800, vmax=10000)
+# print_throughput_heatmap("update", vmin=1400, vmax=24000)
+# print_throughput_heatmap("insert", vmin=1000, vmax=16000)
+
+print_latency_heatmap("read", vmin=200, vmax=2500)
+print_latency_heatmap("update", vmin=0, vmax=1600)
+print_latency_heatmap("insert", vmin=100, vmax=2100)
 
 # print_throughput("read")
 # print_throughput("update")
@@ -222,7 +294,7 @@ def print_general_barplot():
 # print_boxplot("update")
 # print_boxplot("insert")
 
-print_general_barplot()
+# print_general_barplot()
 
 
 plt.show()
