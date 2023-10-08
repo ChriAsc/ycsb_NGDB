@@ -64,7 +64,7 @@ def print_throughput(workload):
         sns.lineplot(data=throughput_per_second, legend='brief', label=database, x=throughput_per_second.index, y=throughput_per_second['operation'])
     plt.xlabel('seconds (sec)')
     plt.ylabel('throughput (ops/sec)')
-    plt.title(f'Throughput: {op_count} operations, {thread} threads, {record_count} records')
+    plt.title(f'Throughput: workload{workload} {op_count} operations, {thread} threads, {record_count} records')
     manager = plt.get_current_fig_manager()
     manager.full_screen_toggle()
     # plt.savefig(f"../Plots/Throughput_{record_count}_{op_count}_{thread}", bbox_inches='tight', dpi=500)
@@ -249,7 +249,7 @@ def print_boxplot(workload):
             sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, hue='operation', log_scale=True)
     plt.xlabel('Database')
     plt.ylabel('Latency (us)')
-    plt.title(f'Latencies\' boxplots: {op_count} operations, {thread} threads, {record_count} records')
+    plt.title(f'Latencies\' boxplots: workload{workload} {op_count} operations, {thread} threads, {record_count} records')
     manager = plt.get_current_fig_manager()
     manager.full_screen_toggle()
     # plt.savefig(f"../Plots/Boxplot_Latency_{workload}", bbox_inches='tight', dpi=500)
@@ -285,9 +285,11 @@ def print_general_barplot():
         ax = axes[i]
         i = i+1
         sns.barplot(runtimes_df, ax=ax, x='workload', y='runtime(mean)', hue='database')
+        # sns.barplot(runtimes_df, ax=ax, x='workload', y='runtime(median)', hue='database')
         ax.set_xlabel('Workload')
         ax.set_ylabel('Runtime (s)')
     fig.suptitle('Mean Runtime')
+    # fig.suptitle('Median Runtime')
     plt.tight_layout()
     manager = plt.get_current_fig_manager()
     manager.full_screen_toggle()
@@ -297,21 +299,21 @@ def print_general_barplot():
 
 
 
-print_throughput_heatmap("read", vmin=800, vmax=10000)
-print_throughput_heatmap("update", vmin=1400, vmax=24000)
-print_throughput_heatmap("insert", vmin=1000, vmax=16000)
+# print_throughput_heatmap("read", vmin=800, vmax=10000)
+# print_throughput_heatmap("update", vmin=1400, vmax=24000)
+# print_throughput_heatmap("insert", vmin=1000, vmax=16000)
 
-print_latency_heatmap("read", vmin=200, vmax=2500)
-print_latency_heatmap("update", vmin=0, vmax=1600)
-print_latency_heatmap("insert", vmin=100, vmax=2100)
+# print_latency_heatmap("read", vmin=200, vmax=2500)
+# print_latency_heatmap("update", vmin=0, vmax=1600)
+# print_latency_heatmap("insert", vmin=100, vmax=2100)
 
-print_throughput("read")
-print_throughput("update")
-print_throughput("insert")
+# print_throughput("read")
+# print_throughput("update")
+# print_throughput("insert")
 
-print_boxplot("read")
-print_boxplot("update")
-print_boxplot("insert")
+# print_boxplot("read")
+# print_boxplot("update")
+# print_boxplot("insert")
 
 print_general_barplot()
 
