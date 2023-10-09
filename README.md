@@ -78,8 +78,13 @@ You can provide DB Connection Parameters or set configs with the shell command.
     bin/ycsb.bat load redis -s -P workloads/workloada -p "redis.host=127.0.0.1" -p "redis.port=6379" > outputLoad.txt
     bin/ycsb.bat run  redis -s -P workloads/workloada -p "redis.host=127.0.0.1" -p "redis.port=6379" > outputRun.txt
 
-  Running the `ycsb` command without any argument will print the usage. 
+  <sub>Running the `ycsb` command without any argument will print the usage</sub>
    
+Alternatively, you can use the python script `tests.py`, which allows you to load and run all databases.
+
+However, raw results are stored as .csv files and have a well-defined structure: the first part shows the operation, the associated timestamp and latency (as many rows as the number of operations/records); the second part (approximately the last 60 rows) gives aggregate measurements.
+
+
   <sub>See https://github.com/brianfrankcooper/YCSB/wiki/Running-a-Workload for a detailed documentation on how to run a workload.</sub>
   
   <sub>See https://github.com/brianfrankcooper/YCSB/wiki/Core-Properties for the list of available workload properties.</sub>
