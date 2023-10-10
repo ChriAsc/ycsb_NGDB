@@ -296,6 +296,36 @@ def print_general_barplot():
     # plt.savefig(f"../Plots/Barplot_MeanRuntime_{workload}", bbox_inches='tight', dpi=500)
     print("Runtime Barplot was successfully saved!")
 
+def print_threadline_plot(workload):
+    if workload == 'read':
+        op_count = 200000
+        record_count = 100000
+    elif workload == 'insert':
+        op_count = 10000
+        record_count = 100000
+    elif workload == 'update':
+        op_count = 20000
+        record_count = 100000
+    else:
+        print("HAI SBAGLIATO IL PARAMETRO. Scegli un valore di workload pari alle stringhe \"read\", \"update\" o \"insert\"")
+
+    for database in databases:
+        throughput_df = pd.DataFrame(columns=["thread","througput", "runtime"])
+        for thread in threads:
+            results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", names=['operation','timestamp(ms)','latency(us)'],skiprows=20, low_memory=False)
+            # Throughput
+            results = results[100:]
+            ts_result = results[results['operation'].str.contains(']') == True]
+            ts_result = ts_result.reset_index(drop=True)
+            ts_result.columns= ['type','feature','value']
+            throughput=ts_result[ts_result['feature']==' Throughput(ops/sec)']['value'].values[0].strip()
+            runtime=ts_result[ts_result['feature']==' RunTime(ms)']['value'].values[0].strip()
+            temp_throughput_df = pd.DataFrame([[thread, throughput, runtime]], columns=['thread', 'throughput', 'runtime'])
+            throughput_df = pd.concat([throughput_df, temp_throughput_df])
+
+        sns.lineplot(data=throughput_df, x="thread", y="throughput", markers="o", legend='brief')
+
+    plt.title(f"Workload: {workload} - Records: {record_count} - Operation: {op_count}")
 
 
 
@@ -315,8 +345,9 @@ def print_general_barplot():
 # print_boxplot("update")
 # print_boxplot("insert")
 
-print_general_barplot()
+#print_general_barplot()
 
+print_threadline_plot('read')
 
 plt.show()
 print('ok')
