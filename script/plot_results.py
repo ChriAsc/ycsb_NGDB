@@ -16,6 +16,9 @@ num_expected_fields = 3
 # op_counts = [20000, 40000, 60000]   # Update
 # op_counts = [10000, 25000, 50000]   # Insert
 
+# Color dictionary
+color_dict = {'redis':'red', 'mongodb':'darkgreen', 'cassandra':'purple'}
+
 # Function to print a lineplot with databases' throughput, given the workload, nr. of operations, nr. of threads and nr. of records.
 def print_throughput(workload):
     if workload == 'read':
@@ -61,7 +64,7 @@ def print_throughput(workload):
         throughput_per_second['TimeElapsed'] = throughput_per_second['TimeElapsed'].astype(int)  # Cast to integers
         throughput_per_second = throughput_per_second.set_index('TimeElapsed')
         # Plotting
-        sns.lineplot(data=throughput_per_second, legend='brief', label=database, x=throughput_per_second.index, y=throughput_per_second['operation'])
+        sns.lineplot(data=throughput_per_second, legend='brief', label=database, x=throughput_per_second.index, y=throughput_per_second['operation'], color=color_dict.get(database))
     plt.xlabel('seconds (sec)')
     plt.ylabel('throughput (ops/sec)')
     plt.title(f'Throughput: workload{workload} {op_count} operations, {thread} threads, {record_count} records')
@@ -243,9 +246,9 @@ def print_boxplot(workload):
         ts_result['database'] = database
         if database == 'mongodb':
             sns.boxplot(data=ts_result, x='database',y='latency(us)', legend='brief', hue='operation', log_scale=True)
-            # sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, log_scale=True) 
+            # sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, log_scale=True boxpropps=color_dict.get(database)) 
         else:
-            # sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, log_scale=True)
+            # sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, log_scale=True, boxpropps=color_dict.get(database))
             sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, hue='operation', log_scale=True)
     plt.xlabel('Database')
     plt.ylabel('Latency (us)')
@@ -284,7 +287,7 @@ def print_general_barplot():
         
         ax = axes[i]
         i = i+1
-        sns.barplot(runtimes_df, ax=ax, x='workload', y='runtime(mean)', hue='database')
+        sns.barplot(runtimes_df, ax=ax, x='workload', y='runtime(mean)', hue='database', palette=color_dict)
         # sns.barplot(runtimes_df, ax=ax, x='workload', y='runtime(median)', hue='database')
         ax.set_xlabel('Workload')
         ax.set_ylabel('Runtime (s)')
@@ -309,8 +312,9 @@ def print_threadline_plot(workload):
     else:
         print("HAI SBAGLIATO IL PARAMETRO. Scegli un valore di workload pari alle stringhe \"read\", \"update\" o \"insert\"")
 
+    plt.figure()
+    throughput_df = pd.DataFrame(columns=["thread","throughput", "runtime", "database"])
     for database in databases:
-        throughput_df = pd.DataFrame(columns=["thread","througput", "runtime"])
         for thread in threads:
             results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", names=['operation','timestamp(ms)','latency(us)'],skiprows=20, low_memory=False)
             # Throughput
@@ -320,10 +324,18 @@ def print_threadline_plot(workload):
             ts_result.columns= ['type','feature','value']
             throughput=ts_result[ts_result['feature']==' Throughput(ops/sec)']['value'].values[0].strip()
             runtime=ts_result[ts_result['feature']==' RunTime(ms)']['value'].values[0].strip()
-            temp_throughput_df = pd.DataFrame([[thread, throughput, runtime]], columns=['thread', 'throughput', 'runtime'])
+            temp_throughput_df = pd.DataFrame([[thread, throughput, runtime, database]], columns=['thread', 'throughput', 'runtime', 'database'])
             throughput_df = pd.concat([throughput_df, temp_throughput_df])
 
-        sns.lineplot(data=throughput_df, x="thread", y="throughput", markers="o", legend='brief')
+    
+    throughput_df['thread'] = throughput_df['thread'].astype(str)
+    throughput_df['thread'] = pd.Categorical(throughput_df['thread'], categories=map(str,threads), ordered=True)
+    throughput_df['throughput'] = throughput_df['throughput'].astype(float)
+    throughput_df['runtime'] = throughput_df['runtime'].astype(int)
+    throughput_df = throughput_df.sort_values(by='throughput')
+    # throughput_df = throughput_df.sort_values(by='runtime')
+
+    sns.lineplot(data=throughput_df, x="thread", y="throughput", marker="o", legend='brief', hue='database', sort=True, palette=color_dict)
 
     plt.title(f"Workload: {workload} - Records: {record_count} - Operation: {op_count}")
 
@@ -337,7 +349,7 @@ def print_threadline_plot(workload):
 # print_latency_heatmap("update", vmin=0, vmax=1600)
 # print_latency_heatmap("insert", vmin=100, vmax=2100)
 
-# print_throughput("read")
+print_throughput("read")
 # print_throughput("update")
 # print_throughput("insert")
 
@@ -345,9 +357,11 @@ def print_threadline_plot(workload):
 # print_boxplot("update")
 # print_boxplot("insert")
 
-#print_general_barplot()
+# print_general_barplot()
 
-print_threadline_plot('read')
+# print_threadline_plot('read')
+# print_threadline_plot('update')
+# print_threadline_plot('insert')
 
 plt.show()
 print('ok')
