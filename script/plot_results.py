@@ -349,7 +349,7 @@ def print_threadline_plot(workload):
 # print_latency_heatmap("update", vmin=0, vmax=1600)
 # print_latency_heatmap("insert", vmin=100, vmax=2100)
 
-print_throughput("read")
+# print_throughput("read")
 # print_throughput("update")
 # print_throughput("insert")
 

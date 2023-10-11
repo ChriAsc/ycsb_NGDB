@@ -33,7 +33,7 @@ def main(database, workload, op_counts):
             fin.write(result_load.stdout)
         for op_count in op_counts:
             for thread in threads:
-                run_command += f"-p operationcount={op_count} -threads {thread}"
+                run_command += f"-p recordcount={record_count} -p operationcount={op_count} -threads {thread}"
                 result_write = subprocess.run(run_command.split(' '), capture_output=True, text=True)
                 print(f"Runned tests with {record_count} records, {op_count} operation and {thread} threads against database successfully")
                 with open(f"../results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", 'w') as fin2:
