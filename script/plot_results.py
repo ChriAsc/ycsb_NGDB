@@ -35,7 +35,7 @@ def print_throughput(workload):
         record_count = 100000
     else:
         print("HAI SBAGLIATO IL PARAMETRO. Scegli un valore di workload pari alle stringhe \"read\", \"update\" o \"insert\"")
-  
+
     # Reading from csv, this variable set the number of fields
     num_expected_fields = 3
 
@@ -101,7 +101,7 @@ def print_throughput_heatmap(workload, vmin, vmax):
     #                     vmax = round(float(throughput)) + 1
     # print(f"Vmin for workload{workload}:\n{vmin}")
     # print(f"Vmax for workload{workload}:\n{vmax}")
-                    
+
     fig, axes = plt.subplots(3,3,figsize=(10,10))
     i = 0
 
@@ -168,7 +168,7 @@ def print_latency_heatmap(workload, vmin, vmax):
     #                     vmax = round(float(average)) + 1
     # print(f"Vmin for workload{workload}:\n{vmin}")
     # print(f"Vmax for workload{workload}:\n{vmax}")
-                    
+
     fig, axes = plt.subplots(3,3,figsize=(10,10))
     i = 0
 
@@ -222,7 +222,7 @@ def print_boxplot(workload):
         record_count = 100000
     else:
         print("HAI SBAGLIATO IL PARAMETRO. Scegli un valore di workload pari alle stringhe \"read\", \"update\" o \"insert\"")
-  
+
     # Reading from csv, this variable set the number of fields
     num_expected_fields = 3
 
@@ -246,7 +246,7 @@ def print_boxplot(workload):
         ts_result['database'] = database
         if database == 'mongodb':
             sns.boxplot(data=ts_result, x='database',y='latency(us)', legend='brief', hue='operation', log_scale=True)
-            # sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, log_scale=True boxpropps=color_dict.get(database)) 
+            # sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, log_scale=True boxpropps=color_dict.get(database))
         else:
             # sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, log_scale=True, boxpropps=color_dict.get(database))
             sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, hue='operation', log_scale=True)
@@ -261,7 +261,7 @@ def print_boxplot(workload):
 def print_general_barplot():
     fig, axes = plt.subplots(1,3,figsize=(12,6))
     i=0
-    
+
     for workload in workloads:
         runtimes_df = pd.DataFrame(columns=['workload', 'database', 'runtime(mean)', 'runtime(median)'])
         for database in databases:
@@ -284,11 +284,11 @@ def print_general_barplot():
             runtime_median = np.median(runtimes)
             runtimes_df.loc[len(runtimes_df.index)] = [workload, database, runtime_mean, runtime_median]
             print(f"Workload{workload} successfully processed with {database}!")
-        
+
         ax = axes[i]
         i = i+1
         sns.barplot(runtimes_df, ax=ax, x='workload', y='runtime(mean)', hue='database', palette=color_dict)
-        # sns.barplot(runtimes_df, ax=ax, x='workload', y='runtime(median)', hue='database')
+        # sns.barplot(runtimes_df, ax=ax, x='workload', y='runtime(median)', hue='database', palette=color_dict)
         ax.set_xlabel('Workload')
         ax.set_ylabel('Runtime (s)')
     fig.suptitle('Mean Runtime')
@@ -327,7 +327,7 @@ def print_threadline_plot(workload):
             temp_throughput_df = pd.DataFrame([[thread, throughput, runtime, database]], columns=['thread', 'throughput', 'runtime', 'database'])
             throughput_df = pd.concat([throughput_df, temp_throughput_df])
 
-    
+
     throughput_df['thread'] = throughput_df['thread'].astype(str)
     throughput_df['thread'] = pd.Categorical(throughput_df['thread'], categories=map(str,threads), ordered=True)
     throughput_df['throughput'] = throughput_df['throughput'].astype(float)
