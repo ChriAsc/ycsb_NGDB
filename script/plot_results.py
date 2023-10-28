@@ -18,6 +18,7 @@ num_expected_fields = 3
 
 # Color dictionary
 color_dict = {'redis':'red', 'mongodb':'darkgreen', 'cassandra':'purple'}
+op_dict = {'READ':'blue', 'SCAN':'green', 'UPDATE':'orange', 'INSERT': 'red', 'READ-MODIFY-WRITE': 'yellow'}
 
 # Function to print a lineplot with databases' throughput, given the workload, nr. of operations, nr. of threads and nr. of records.
 def print_throughput(workload):
@@ -245,11 +246,11 @@ def print_boxplot(workload):
         ts_result['latency(us)'] = ts_result['latency(us)'].astype(int)
         ts_result['database'] = database
         if database == 'mongodb':
-            sns.boxplot(data=ts_result, x='database',y='latency(us)', legend='brief', hue='operation', log_scale=True)
+            sns.boxplot(data=ts_result, x='database',y='latency(us)', legend='brief', hue='operation', log_scale=True, palette=op_dict)
             # sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, log_scale=True boxpropps=color_dict.get(database))
         else:
             # sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, log_scale=True, boxpropps=color_dict.get(database))
-            sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, hue='operation', log_scale=True)
+            sns.boxplot(data=ts_result, x='database',y='latency(us)', legend=False, hue='operation', log_scale=True, palette=op_dict)
     plt.xlabel('Database')
     plt.ylabel('Latency (us)')
     plt.title(f'Latencies\' boxplots: workload{workload} {op_count} operations, {thread} threads, {record_count} records')
@@ -287,12 +288,12 @@ def print_general_barplot():
 
         ax = axes[i]
         i = i+1
-        sns.barplot(runtimes_df, ax=ax, x='workload', y='runtime(mean)', hue='database', palette=color_dict)
-        # sns.barplot(runtimes_df, ax=ax, x='workload', y='runtime(median)', hue='database', palette=color_dict)
+        # sns.barplot(runtimes_df, ax=ax, x='workload', y='runtime(mean)', hue='database', palette=color_dict)
+        sns.barplot(runtimes_df, ax=ax, x='workload', y='runtime(median)', hue='database', palette=color_dict)
         ax.set_xlabel('Workload')
         ax.set_ylabel('Runtime (s)')
-    fig.suptitle('Mean Runtime')
-    # fig.suptitle('Median Runtime')
+    # fig.suptitle('Mean Runtime')
+    fig.suptitle('Median Runtime')
     plt.tight_layout()
     manager = plt.get_current_fig_manager()
     manager.full_screen_toggle()
@@ -343,10 +344,10 @@ def print_threadline_plot(workload):
 
 # print_throughput_heatmap("read", vmin=800, vmax=10000)
 # print_throughput_heatmap("update", vmin=1400, vmax=24000)
-# print_throughput_heatmap("insert", vmin=1000, vmax=16000)
+# print_throughput_heatmap("insert", vmin=1000, vmax=17000)
 
 # print_latency_heatmap("read", vmin=200, vmax=2500)
-# print_latency_heatmap("update", vmin=0, vmax=1600)
+# print_latency_heatmap("update", vmin=0, vmax=1700)
 # print_latency_heatmap("insert", vmin=100, vmax=2100)
 
 # print_throughput("read")
