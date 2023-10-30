@@ -341,6 +341,41 @@ def print_threadline_plot(workload):
     plt.title(f"Workload: {workload} - Records: {record_count} - Operation: {op_count}")
 
 
+def latency_lineplot_threads(workload):
+    if workload == 'read':
+        op_count = 400000
+        record_count = 200000
+    elif workload == 'insert':
+        op_count = 25000
+        record_count = 200000
+    elif workload == 'update':
+        op_count = 40000
+        record_count = 200000
+    else:
+        print("HAI SBAGLIATO IL PARAMETRO. Scegli un valore di workload pari alle stringhe \"read\", \"update\" o \"insert\"")
+        plt.figure()
+        throughput_df = pd.DataFrame(columns=["thread", "latency(us)", "database"])
+        for database in databases:                
+            for thread in threads:
+                results = pd.read_csv(f"results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", names=['operation', 'timestamp(ms)', 'latency(us)'], skiprows=20, low_memory=False)
+                # Latency
+                l_result = results[results['operation'].str.contains(']') == False]
+                l_result = l_result.reset_index(drop=True)
+                # Since some headers are considered in read_csv, we filter them
+                l_result = l_result[l_result['timestamp(ms)']!=' timestamp(ms)']
+                l_result = l_result[l_result['operation'] != 'CLEANUP']
+                latencies = l_result['latency(us)'].astype(float)
+                average = latencies.sum()/len(latencies)
+                temp_throughput_df = pd.DataFrame([[thread, average, database]],columns=['thread', 'latency(us)', 'database'])
+                throughput_df = pd.concat([throughput_df, temp_throughput_df])
+                throughput_df['thread'] = throughput_df['thread'].astype(str)
+                throughput_df['thread'] = pd.Categorical(throughput_df['thread'], categories=map(str, threads),ordered=True)
+                sns.lineplot(data=throughput_df, x="thread", y="latency(us)", marker="o", legend='brief', hue='database', sort=True, palette=color_dict)
+                plt.title(f"Workload: {workload} - Records: {record_count} - Operation: {op_count}")
+                plt.tight_layout()
+                manager = plt.get_current_fig_manager()
+                manager.full_screen_toggle()
+
 
 # print_throughput_heatmap("read", vmin=800, vmax=10000)
 # print_throughput_heatmap("update", vmin=1400, vmax=24000)
@@ -363,6 +398,10 @@ def print_threadline_plot(workload):
 # print_threadline_plot('read')
 # print_threadline_plot('update')
 # print_threadline_plot('insert')
+
+# latency_lineplot_threads('read')
+# latency_lineplot_threads('update')
+# latency_lineplot_threads('insert')
 
 plt.show()
 print('ok')
