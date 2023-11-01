@@ -211,16 +211,16 @@ def print_latency_heatmap(workload, vmin, vmax):
 def print_boxplot(workload):
     if workload == 'read':
         op_count = 200000
-        thread = 1
         record_count = 100000
+        thread=4
     elif workload == 'insert':
         op_count = 10000
-        thread = 1
         record_count = 100000
+        thread=4
     elif workload == 'update':
         op_count = 20000
-        thread = 1
         record_count = 100000
+        thread=4
     else:
         print("HAI SBAGLIATO IL PARAMETRO. Scegli un valore di workload pari alle stringhe \"read\", \"update\" o \"insert\"")
 
@@ -389,9 +389,9 @@ def latency_lineplot_threads(workload):
 # print_throughput("update")
 # print_throughput("insert")
 
-# print_boxplot("read")
-# print_boxplot("update")
-# print_boxplot("insert")
+print_boxplot("read")
+print_boxplot("update")
+print_boxplot("insert")
 
 # print_general_barplot()
 
