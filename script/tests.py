@@ -26,6 +26,7 @@ def main(database, workload, op_counts):
     else:
         print("ERRORE. NOME DEL DATABASE ERRATO. PER FAVORE USA \"mongodb\" \"cassandra\" o \"redis\"")
     for record_count in record_counts:
+        record_count_effective = record_count
         load_command += f"-p recordcount={record_count}"
         result_load = subprocess.run(load_command.split(' '), capture_output=True, text=True)
         print(f"Loaded {record_count} records to database successfully")
@@ -33,9 +34,11 @@ def main(database, workload, op_counts):
             fin.write(result_load.stdout)
         for op_count in op_counts:
             for thread in threads:
-                run_command += f"-p recordcount={record_count} -p operationcount={op_count} -threads {thread}"
+                if workload == "insert":
+                    record_count_effective += 0.8*op_count
+                run_command += f"-p recordcount={record_count_effective} -p operationcount={op_count} -threads {thread}"
                 result_write = subprocess.run(run_command.split(' '), capture_output=True, text=True)
-                print(f"Runned tests with {record_count} records, {op_count} operation and {thread} threads against database successfully")
+                print(f"Runned tests with {record_count_effective} records, {op_count} operation and {thread} threads against database successfully")
                 with open(f"../results/{database}/workload{workload}/output_run_{record_count}_{op_count}_{thread}.csv", 'w') as fin2:
                     fin2.write(result_write.stdout)
                 run_command = run_command_start
