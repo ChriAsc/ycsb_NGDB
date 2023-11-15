@@ -47,7 +47,7 @@ You can also run a Docker container. [Docker](https://www.docker.com/) is a cont
 YCSB requires the use of Maven 3; if you use Maven 2, you may see [errors such as these](https://github.com/brianfrankcooper/YCSB/issues/406).
 
 ### 3. Set Up YCSB
-Download the [latest release of ycsb_NGDB](https://github.com/ChriAsc/ycsb_NGDB/releases):
+Download the [latest release of ycsb_NGDB]:
 
     git clone https://github.com/ChriAsc/ycsb_NGDB
     cd ycsb_NGDB
@@ -80,7 +80,7 @@ You can provide DB Connection Parameters or set configs with the shell command.
 
   <sub>Running the `ycsb` command without any argument will print the usage</sub>
    
-Alternatively, you can use the python script `tests.py`, which allows you to load and run all databases.
+Alternatively, you can use the python script `tests.py`, which allows you to load and run all databases. Inside the *script* directory, you can find all the scripts that were used during the tests, e.g. to store data and to plot figures.
 
 However, raw results are stored as .csv files and have a well-defined structure: the first part shows the operation, the associated timestamp and latency (as many rows as the number of operations/records); the second part (approximately the last 60 rows) gives aggregate measurements.
 
